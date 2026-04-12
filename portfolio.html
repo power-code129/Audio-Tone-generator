@@ -1,0 +1,1836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Audio Tone Generator — Priyanka Gandhi A</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Serif+Display:ital@0;1&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #10101a;
+    --surface2: #16162a;
+    --accent: #7b5ea7;
+    --accent2: #e040fb;
+    --accent3: #00e5ff;
+    --gold: #ffd54f;
+    --text: #e8e0f0;
+    --muted: #7a7090;
+    --border: rgba(123,94,167,0.22);
+    --glow: 0 0 32px rgba(224,64,251,0.18), 0 0 80px rgba(0,229,255,0.08);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Syne', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── FLOATING MUSICAL NOTES ── */
+  .music-note {
+    position: absolute;
+    font-size: 22px;
+    opacity: 0;
+    pointer-events: none;
+    user-select: none;
+    animation: floatNote linear infinite;
+    z-index: 0;
+  }
+
+  @keyframes floatNote {
+    0%   { opacity: 0;    transform: translateY(0)   rotate(0deg)   scale(0.7); }
+    10%  { opacity: 0.55; }
+    80%  { opacity: 0.3;  }
+    100% { opacity: 0;    transform: translateY(-140px) rotate(25deg) scale(1.1); }
+  }
+
+  .hero-notes-layer {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* Section note accent */
+  .note-accent {
+    display: inline-block;
+    color: var(--accent2);
+    font-size: 1em;
+    margin: 0 4px;
+    opacity: 0.7;
+    vertical-align: middle;
+  }
+
+  /* Nav logo note */
+  .nav-note {
+    color: var(--accent2);
+    font-size: 18px;
+    margin-right: 6px;
+    vertical-align: middle;
+    opacity: 0.85;
+    display: inline-block;
+    animation: bobNote 2.4s ease-in-out infinite;
+  }
+
+  @keyframes bobNote {
+    0%, 100% { transform: translateY(0) rotate(-8deg); }
+    50%       { transform: translateY(-4px) rotate(8deg); }
+  }
+
+  /* How-card note badge */
+  .note-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 20px;
+    margin-bottom: 16px;
+  }
+
+  /* Section title inline note */
+  .title-note {
+    color: var(--accent2);
+    font-style: normal;
+    opacity: 0.65;
+    font-size: 0.75em;
+    vertical-align: super;
+    margin-left: 4px;
+  }
+
+  /* Footer notes row */
+  .footer-notes {
+    letter-spacing: 8px;
+    font-size: 18px;
+    opacity: 0.25;
+    color: var(--accent2);
+    margin: 0 16px;
+  }
+
+  /* NOISE GRAIN */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    background-size: 180px;
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.5;
+  }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 70% 60% at 80% 30%, rgba(224,64,251,0.13) 0%, transparent 65%),
+      radial-gradient(ellipse 50% 70% at 20% 80%, rgba(0,229,255,0.09) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 50% 50%, rgba(123,94,167,0.07) 0%, transparent 70%);
+  }
+
+  .hero-left {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 80px 60px 80px 80px;
+    position: relative;
+    z-index: 2;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(123,94,167,0.18);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 6px 16px;
+    font-size: 11px;
+    font-family: 'Space Mono', monospace;
+    color: var(--accent3);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 32px;
+    width: fit-content;
+    animation: fadeSlideDown 0.8s ease both;
+  }
+
+  .badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent3);
+    box-shadow: 0 0 8px var(--accent3);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+
+  .hero-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(40px, 5vw, 68px);
+    line-height: 1.08;
+    margin-bottom: 8px;
+    animation: fadeSlideDown 0.9s 0.1s ease both;
+  }
+
+  .hero-title span {
+    color: transparent;
+    -webkit-text-stroke: 1px var(--accent2);
+    font-style: italic;
+  }
+
+  .hero-subtitle {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    color: var(--muted);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    animation: fadeSlideDown 0.9s 0.2s ease both;
+  }
+
+  .hero-desc {
+    font-size: 16px;
+    color: #b0a8c0;
+    line-height: 1.75;
+    max-width: 420px;
+    margin-bottom: 40px;
+    animation: fadeSlideDown 0.9s 0.3s ease both;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    animation: fadeSlideDown 0.9s 0.4s ease both;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 28px;
+    border-radius: 6px;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+    border: none;
+    letter-spacing: 0.5px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    color: white;
+    box-shadow: 0 4px 24px rgba(224,64,251,0.3);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(224,64,251,0.45);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .btn-outline:hover {
+    border-color: var(--accent2);
+    color: var(--accent2);
+    background: rgba(224,64,251,0.06);
+  }
+
+  /* HERO RIGHT — WAVEFORM CANVAS */
+  .hero-right {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .wave-display {
+    width: 100%;
+    max-width: 520px;
+    padding: 24px;
+  }
+
+  .wave-card {
+    background: rgba(16,16,26,0.9);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: var(--glow);
+    animation: fadeSlideUp 1s 0.3s ease both;
+  }
+
+  .wave-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .wave-card-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .wave-status {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--accent3);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .dot-live {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent3);
+    box-shadow: 0 0 8px var(--accent3);
+    animation: pulse 1.5s infinite;
+  }
+
+  #waveCanvas {
+    display: block;
+    width: 100%;
+    height: 140px;
+    background: transparent;
+  }
+
+  .piano-section {
+    padding: 20px 22px 22px;
+  }
+
+  .piano-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 14px;
+  }
+
+  .piano {
+    display: flex;
+    gap: 3px;
+    flex-wrap: wrap;
+  }
+
+  .key {
+    flex: 1;
+    min-width: 36px;
+    height: 64px;
+    border-radius: 0 0 6px 6px;
+    cursor: pointer;
+    transition: all 0.1s;
+    position: relative;
+    border: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    padding-bottom: 8px;
+    font-family: 'Space Mono', monospace;
+    font-size: 9px;
+    user-select: none;
+  }
+
+  .key.white {
+    background: linear-gradient(180deg, #2a2440 0%, #1e1a30 100%);
+    color: var(--muted);
+  }
+
+  .key.white:hover, .key.white.active {
+    background: linear-gradient(180deg, var(--accent2) 0%, var(--accent) 100%);
+    color: white;
+    box-shadow: 0 4px 20px rgba(224,64,251,0.4), inset 0 -3px 0 rgba(0,0,0,0.3);
+    transform: translateY(2px);
+  }
+
+  .freq-display {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--accent3);
+    margin-top: 6px;
+    display: block;
+    opacity: 0.7;
+  }
+
+  /* ── SECTION BASE ── */
+  section {
+    padding: 100px 80px;
+    position: relative;
+  }
+
+  .section-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--accent3);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    max-width: 60px;
+    height: 1px;
+    background: var(--accent3);
+    opacity: 0.4;
+  }
+
+  .section-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(32px, 4vw, 52px);
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+
+  .section-title em {
+    color: transparent;
+    -webkit-text-stroke: 1px var(--accent2);
+    font-style: italic;
+  }
+
+  /* ── ABOUT ── */
+  .about {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .about-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: 80px;
+    align-items: start;
+    margin-top: 60px;
+  }
+
+  .profile-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 36px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .profile-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 80px;
+    background: linear-gradient(135deg, rgba(123,94,167,0.3), rgba(224,64,251,0.2));
+  }
+
+  .avatar {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    position: relative;
+    z-index: 1;
+    box-shadow: 0 0 0 3px var(--bg), 0 0 0 5px var(--accent);
+    margin-top: 16px;
+  }
+
+  .profile-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 24px;
+    margin-bottom: 6px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .profile-role {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--accent3);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 24px;
+  }
+
+  .profile-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+
+  .tag {
+    padding: 5px 14px;
+    border-radius: 100px;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+  }
+
+  .tag-accent {
+    background: rgba(123,94,167,0.2);
+    border: 1px solid rgba(123,94,167,0.35);
+    color: #c3aee8;
+  }
+
+  .tag-teal {
+    background: rgba(0,229,255,0.1);
+    border: 1px solid rgba(0,229,255,0.25);
+    color: var(--accent3);
+  }
+
+  .about-content { }
+
+  .about-text {
+    font-size: 17px;
+    line-height: 1.8;
+    color: #b8b0cc;
+    margin-bottom: 40px;
+  }
+
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 40px;
+  }
+
+  .stat {
+    text-align: center;
+    padding: 28px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    transition: border-color 0.2s;
+  }
+
+  .stat:hover { border-color: var(--accent2); }
+
+  .stat-number {
+    font-family: 'DM Serif Display', serif;
+    font-size: 40px;
+    background: linear-gradient(135deg, var(--accent2), var(--accent3));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    display: block;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+
+  .stat-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+  }
+
+  /* ── HOW IT WORKS ── */
+  .how {
+    background: var(--bg);
+  }
+
+  .how-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
+    margin-top: 60px;
+  }
+
+  .how-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px 24px;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+
+  .how-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent2), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .how-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.3); }
+  .how-card:hover::before { opacity: 1; }
+
+  .how-icon {
+    font-size: 32px;
+    margin-bottom: 20px;
+    display: block;
+  }
+
+  .how-num {
+    position: absolute;
+    top: 20px; right: 24px;
+    font-family: 'DM Serif Display', serif;
+    font-size: 52px;
+    color: rgba(255,255,255,0.04);
+    line-height: 1;
+  }
+
+  .how-card h3 {
+    font-size: 17px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    color: var(--text);
+  }
+
+  .how-card p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+
+  /* ── INTERACTIVE DEMO ── */
+  .demo {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .demo-wrapper {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 60px;
+    margin-top: 60px;
+    align-items: start;
+  }
+
+  .demo-panel {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    overflow: hidden;
+  }
+
+  .demo-panel-header {
+    padding: 18px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-red { background: #ff5f57; }
+  .dot-yellow { background: #febc2e; }
+  .dot-green { background: #28c840; }
+
+  .demo-panel-body { padding: 28px; }
+
+  .synth-controls {
+    display: grid;
+    gap: 20px;
+  }
+
+  .control-group label {
+    display: block;
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+  }
+
+  .control-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    flex: 1;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    outline: none;
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent2);
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(224,64,251,0.5);
+  }
+
+  .range-val {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--accent3);
+    min-width: 56px;
+    text-align: right;
+  }
+
+  .note-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    margin-top: 8px;
+  }
+
+  .note-btn {
+    padding: 10px 0;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+
+  .note-btn:hover {
+    border-color: var(--accent2);
+    background: rgba(224,64,251,0.1);
+    color: var(--accent2);
+    box-shadow: 0 0 12px rgba(224,64,251,0.2);
+  }
+
+  .note-btn.playing {
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    border-color: var(--accent2);
+    color: white;
+    box-shadow: 0 4px 20px rgba(224,64,251,0.4);
+    transform: scale(0.96);
+  }
+
+  .chord-section { margin-top: 20px; }
+
+  .chord-btns {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+
+  .chord-btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .chord-btn:hover {
+    border-color: var(--accent3);
+    color: var(--accent3);
+    background: rgba(0,229,255,0.07);
+  }
+
+  .melody-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px dashed rgba(255,213,79,0.4);
+    background: rgba(255,213,79,0.05);
+    color: var(--gold);
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .melody-btn:hover {
+    background: rgba(255,213,79,0.12);
+    border-color: var(--gold);
+  }
+
+  #bigCanvas {
+    width: 100%;
+    height: 220px;
+    border-radius: 12px;
+    background: var(--bg);
+    display: block;
+  }
+
+  .freq-readout {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    background: var(--bg);
+    border-radius: 10px;
+    margin-top: 12px;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .freq-readout .label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 2px; }
+  .freq-readout .value { font-size: 20px; color: var(--accent2); font-weight: 700; }
+  .freq-readout .unit { font-size: 11px; color: var(--muted); }
+
+  /* ── CODE ── */
+  .code-section { background: var(--bg); }
+
+  .code-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    margin-top: 48px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.3);
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .code-header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .code-dots { display: flex; gap: 6px; }
+
+  .code-lang {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  pre {
+    padding: 32px;
+    overflow-x: auto;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    line-height: 1.75;
+  }
+
+  .kw { color: #c792ea; }
+  .fn { color: #82aaff; }
+  .str { color: #c3e88d; }
+  .num { color: var(--accent3); }
+  .cmt { color: #546e7a; font-style: italic; }
+  .op { color: var(--accent2); }
+  .var { color: #ffcb6b; }
+
+  /* ── FORMULA ── */
+  .formula-section { background: var(--surface); border-top: 1px solid var(--border); }
+
+  .formula-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px;
+    margin-top: 56px;
+  }
+
+  .formula-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px;
+    transition: border-color 0.2s;
+  }
+
+  .formula-card:hover { border-color: rgba(224,64,251,0.4); }
+
+  .formula-card h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    margin-bottom: 12px;
+  }
+
+  .formula-card p {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+    margin-bottom: 20px;
+  }
+
+  .formula-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 24px;
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    color: var(--accent3);
+    text-align: center;
+    letter-spacing: 0.5px;
+  }
+
+  .vars-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+  }
+
+  .var-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    background: rgba(123,94,167,0.15);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+  }
+
+  .var-chip .vn { color: var(--accent2); }
+  .var-chip .vd { color: var(--muted); }
+
+  /* ── FREQ TABLE ── */
+  .table-section { background: var(--bg); }
+
+  .freq-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 48px;
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+  }
+
+  .freq-table th {
+    padding: 14px 20px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  .freq-table td {
+    padding: 14px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    transition: background 0.2s;
+  }
+
+  .freq-table tr:hover td {
+    background: rgba(123,94,167,0.08);
+    cursor: pointer;
+  }
+
+  .freq-table .note-name { color: var(--accent2); font-weight: 700; }
+  .freq-table .freq-val { color: var(--accent3); }
+  .freq-table .bar-cell { width: 200px; }
+
+  .freq-bar {
+    height: 4px;
+    border-radius: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    transition: width 0.3s;
+  }
+
+  /* ── GITHUB ── */
+  .github-section {
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    text-align: center;
+    padding: 100px 80px;
+  }
+
+  .github-card {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 60px 80px;
+    max-width: 600px;
+    width: 100%;
+    transition: box-shadow 0.3s;
+  }
+
+  .github-card:hover { box-shadow: var(--glow); }
+
+  .github-icon {
+    font-size: 56px;
+    line-height: 1;
+  }
+
+  .github-card h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px;
+    margin-bottom: 8px;
+  }
+
+  .github-card p {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    padding: 48px 80px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .footer-left { font-family: 'Space Mono', monospace; font-size: 12px; color: var(--muted); }
+  .footer-left strong { color: var(--text); }
+  .footer-right { font-family: 'Space Mono', monospace; font-size: 11px; color: var(--muted); }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 80px;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(123,94,167,0.1);
+  }
+
+  .nav-logo {
+    font-family: 'DM Serif Display', serif;
+    font-size: 20px;
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .nav-logo span { color: var(--accent2); }
+
+  .nav-links {
+    display: flex;
+    gap: 36px;
+    list-style: none;
+  }
+
+  .nav-links a {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    transition: color 0.2s;
+  }
+
+  .nav-links a:hover { color: var(--accent2); }
+
+  /* ANIMATIONS */
+  @keyframes fadeSlideDown {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeSlideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* SCROLL REVEAL */
+  .reveal {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+  .reveal.visible { opacity: 1; transform: none; }
+
+  @media (max-width: 900px) {
+    .hero { grid-template-columns: 1fr; }
+    .hero-right { display: none; }
+    .hero-left { padding: 120px 32px 60px; }
+    section { padding: 70px 32px; }
+    nav { padding: 20px 32px; }
+    footer { padding: 32px; flex-direction: column; gap: 12px; text-align: center; }
+    .how-grid { grid-template-columns: repeat(2, 1fr); }
+    .demo-wrapper { grid-template-columns: 1fr; }
+    .about-grid { grid-template-columns: 1fr; }
+    .formula-grid { grid-template-columns: 1fr; }
+    .github-section { padding: 70px 32px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo"><span class="nav-note">♪</span>Audio<span>Tone</span></a>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#demo">Demo</a></li>
+    <li><a href="#code">Code</a></li>
+    <li><a href="#theory">Theory</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero" style="padding:0">
+  <div class="hero-bg"></div>
+  <!-- Floating musical notes -->
+  <div class="hero-notes-layer" id="heroNotesLayer"></div>
+
+  <div class="hero-left">
+    <div class="badge">♩ ECE · Signal Processing · Scilab</div>
+    <h1 class="hero-title">
+      Audio Tone<br><span>Generator</span>
+    </h1>
+    <p class="hero-subtitle"><span class="note-accent">♫</span> Digital Audio Synthesis <span class="note-accent">♬</span></p>
+    <p class="hero-desc">
+      A Scilab-based audio synthesis engine that generates musical tones across six octaves using sine wave mathematics — from deep bass C1 to soaring C6.
+    </p>
+    <div class="hero-actions">
+      <a href="https://github.com/power-code129/Audio-Tone-generator" target="_blank" class="btn btn-primary">
+        ⭐ View on GitHub
+      </a>
+      <a href="#demo" class="btn btn-outline">
+        ▶ Try Live Demo
+      </a>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="wave-display">
+      <div class="wave-card">
+        <div class="wave-card-header">
+          <span class="wave-card-title">Waveform Visualizer</span>
+          <span class="wave-status"><span class="dot-live"></span>Real-time</span>
+        </div>
+        <canvas id="waveCanvas" width="480" height="140"></canvas>
+        <div class="piano-section">
+          <div class="piano-label">Click to play — C Major Scale</div>
+          <div class="piano" id="heroPiano"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="about" id="about">
+  <div class="section-label">01 — About the Developer</div>
+  <h2 class="section-title">Meet the <em>Creator</em></h2>
+
+  <div class="about-grid reveal">
+    <div>
+      <div class="profile-card">
+        <div class="avatar">🎵</div>
+        <div class="profile-name">Priyanka Gandhi A</div>
+        <div class="profile-role">ECE Student · 22UEL031</div>
+        <div class="profile-tags">
+          <span class="tag tag-accent">Electronics</span>
+          <span class="tag tag-accent">Communication Engg.</span>
+          <span class="tag tag-teal">Scilab</span>
+          <span class="tag tag-teal">Signal Processing</span>
+          <span class="tag tag-accent">Audio DSP</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="about-content">
+      <p class="about-text">
+        Priyanka Gandhi A is an Electronics and Communication Engineering student (Roll No. 22UEL031) with a strong grasp of signal processing and digital audio systems. This project demonstrates the application of fundamental DSP concepts — sine wave synthesis, sampling theory, and frequency-domain analysis — implemented entirely in Scilab.
+      </p>
+      <p class="about-text">
+        The Audio Tone Generator covers 7 musical notes (C through B) across 6 octaves, offering capabilities ranging from individual note playback to complex chord synthesis and melody sequencing. It bridges abstract mathematical theory with tangible, audible output.
+      </p>
+
+      <div class="stats-row">
+        <div class="stat">
+          <span class="stat-number">42</span>
+          <span class="stat-label">Unique Tones</span>
+        </div>
+        <div class="stat">
+          <span class="stat-number">6</span>
+          <span class="stat-label">Octaves</span>
+        </div>
+        <div class="stat">
+          <span class="stat-number">8k</span>
+          <span class="stat-label">Sample Rate (Hz)</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how">
+  <div class="section-label">02 — How It Works</div>
+  <h2 class="section-title">The <em>Science</em> Behind Sound<span class="title-note">♪</span></h2>
+
+  <div class="how-grid reveal">
+    <div class="how-card">
+      <span class="how-num">1</span>
+      <span class="note-badge">〰️ <span style="color:var(--accent2);font-size:18px">𝄞</span></span>
+      <h3>Sine Wave Generation</h3>
+      <p>Each tone is a pure sine wave computed as A·sin(2πft), where frequency f determines musical pitch across 6 octaves.</p>
+    </div>
+    <div class="how-card">
+      <span class="how-num">2</span>
+      <span class="note-badge">📐 <span style="color:var(--accent3);font-size:18px">♩</span></span>
+      <h3>Sampling at 8 kHz</h3>
+      <p>Digital audio is discretized at fs = 8000 Hz with a 0.5-second time vector, satisfying Nyquist for all generated frequencies.</p>
+    </div>
+    <div class="how-card">
+      <span class="how-num">3</span>
+      <span class="note-badge">🎸 <span style="color:var(--accent2);font-size:18px">♫</span></span>
+      <h3>Chord Synthesis</h3>
+      <p>Chords emerge by summing simultaneous sine waves. C Major = C + E + G — superposition of waveforms produces harmony.</p>
+    </div>
+    <div class="how-card">
+      <span class="how-num">4</span>
+      <span class="note-badge">🎼 <span style="color:var(--gold);font-size:18px">♬</span></span>
+      <h3>Melody Sequencing</h3>
+      <p>Concatenating individual note arrays creates melodic sequences. The code plays a full scale by chaining C4→D4→E4→F4→G4→A4→B4.</p>
+    </div>
+  </div>
+</section>
+
+<!-- DEMO -->
+<section class="demo" id="demo">
+  <div class="section-label">03 — Interactive Demo</div>
+  <h2 class="section-title">Hear the <em>Frequencies</em><span class="title-note">♫</span></h2>
+
+  <div class="demo-wrapper reveal">
+    <div>
+      <div class="demo-panel">
+        <div class="demo-panel-header">
+          <div class="code-dots">
+            <div class="dot dot-red"></div>
+            <div class="dot dot-yellow"></div>
+            <div class="dot dot-green"></div>
+          </div>
+          <span>Audio Synthesizer — Web Demo</span>
+        </div>
+        <div class="demo-panel-body">
+          <div class="synth-controls">
+
+            <div class="control-group">
+              <label>Waveform Type</label>
+              <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="note-btn wave-type-btn active" data-type="sine" onclick="setWaveType('sine',this)">Sine</button>
+                <button class="note-btn wave-type-btn" data-type="square" onclick="setWaveType('square',this)">Square</button>
+                <button class="note-btn wave-type-btn" data-type="sawtooth" onclick="setWaveType('sawtooth',this)">Sawtooth</button>
+                <button class="note-btn wave-type-btn" data-type="triangle" onclick="setWaveType('triangle',this)">Triangle</button>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <label>Amplitude (Volume)</label>
+              <div class="control-row">
+                <input type="range" id="ampRange" min="0" max="1" step="0.01" value="0.5" oninput="document.getElementById('ampVal').textContent=parseFloat(this.value).toFixed(2)">
+                <span class="range-val" id="ampVal">0.50</span>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <label>Duration (seconds)</label>
+              <div class="control-row">
+                <input type="range" id="durRange" min="0.1" max="2" step="0.1" value="0.5" oninput="document.getElementById('durVal').textContent=parseFloat(this.value).toFixed(1)+'s'">
+                <span class="range-val" id="durVal">0.5s</span>
+              </div>
+            </div>
+
+            <div class="control-group">
+              <label>Play Individual Notes — Octave 4</label>
+              <div class="note-grid" id="noteGrid"></div>
+            </div>
+
+            <div class="chord-section">
+              <label style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;">Play Chords</label>
+              <div class="chord-btns">
+                <button class="chord-btn" onclick="playChord('C_major')">C Major</button>
+                <button class="chord-btn" onclick="playChord('A_minor')">A Minor</button>
+                <button class="chord-btn" onclick="playChord('G_major')">G Major</button>
+                <button class="chord-btn" onclick="playChord('F_major')">F Major</button>
+              </div>
+            </div>
+
+            <button class="melody-btn" onclick="playMelody()">
+              ♪ Play C Major Scale Melody (C4→B4)
+            </button>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div style="margin-bottom:16px">
+        <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:2px;margin-bottom:12px;">Live Waveform</div>
+        <canvas id="bigCanvas" width="480" height="220"></canvas>
+        <div class="freq-readout">
+          <div>
+            <div class="label">Current Note</div>
+            <div class="value" id="currentNote">—</div>
+          </div>
+          <div style="text-align:right">
+            <div class="label">Frequency</div>
+            <div style="display:flex;align-items:baseline;gap:6px;justify-content:flex-end">
+              <span class="value" id="currentFreq">—</span>
+              <span class="unit">Hz</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CODE -->
+<section class="code-section" id="code">
+  <div class="section-label">04 — Source Code</div>
+  <h2 class="section-title">Written in <em>Scilab</em><span class="title-note">𝄞</span></h2>
+
+  <div class="code-block reveal">
+    <div class="code-header">
+      <div class="code-header-left">
+        <div class="code-dots">
+          <div class="dot dot-red"></div>
+          <div class="dot dot-yellow"></div>
+          <div class="dot dot-green"></div>
+        </div>
+        <span class="code-lang">4.sce — Scilab</span>
+      </div>
+      <span style="font-family:'Space Mono',monospace;font-size:10px;color:var(--muted)">by Priyanka Gandhi A · 22UEL031</span>
+    </div>
+    <pre><span class="cmt">// Project done by Priyanka Gandhi A (22uel031)</span>
+
+<span class="fn">clc</span><span class="op">;</span>
+<span class="fn">clear all</span><span class="op">;</span>
+<span class="fn">close</span><span class="op">;</span>
+
+<span class="cmt">// Sampling frequency</span>
+<span class="var">fs</span> <span class="op">=</span> <span class="num">8000</span><span class="op">;</span>
+<span class="var">t</span>  <span class="op">=</span> <span class="num">0</span><span class="op">:</span><span class="num">1</span><span class="op">/</span><span class="var">fs</span><span class="op">:</span><span class="num">0.5</span><span class="op">;</span>   <span class="cmt">// Time vector for 0.5 seconds</span>
+<span class="var">k</span>  <span class="op">=</span> <span class="num">2</span><span class="op">;</span>              <span class="cmt">// Frequency scaling factor</span>
+
+<span class="cmt">// ── C Notes (C1–C6) ──────────────────────────</span>
+<span class="var">C1</span> <span class="op">=</span> <span class="fn">sin</span>(<span class="num">2</span><span class="op">*</span><span class="kw">%pi</span><span class="op">*</span><span class="var">k</span><span class="op">*</span><span class="num">33</span><span class="op">*</span><span class="var">t</span>)<span class="op">;</span>   <span class="var">C2</span> <span class="op">=</span> <span class="fn">sin</span>(<span class="num">2</span><span class="op">*</span><span class="kw">%pi</span><span class="op">*</span><span class="var">k</span><span class="op">*</span><span class="num">65</span><span class="op">*</span><span class="var">t</span>)<span class="op">;</span>
+<span class="var">C3</span> <span class="op">=</span> <span class="fn">sin</span>(<span class="num">2</span><span class="op">*</span><span class="kw">%pi</span><span class="op">*</span><span class="var">k</span><span class="op">*</span><span class="num">130</span><span class="op">*</span><span class="var">t</span>)<span class="op">;</span>  <span class="var">C4</span> <span class="op">=</span> <span class="fn">sin</span>(<span class="num">2</span><span class="op">*</span><span class="kw">%pi</span><span class="op">*</span><span class="var">k</span><span class="op">*</span><span class="num">262</span><span class="op">*</span><span class="var">t</span>)<span class="op">;</span>
+<span class="var">C5</span> <span class="op">=</span> <span class="fn">sin</span>(<span class="num">2</span><span class="op">*</span><span class="kw">%pi</span><span class="op">*</span><span class="var">k</span><span class="op">*</span><span class="num">523</span><span class="op">*</span><span class="var">t</span>)<span class="op">;</span>  <span class="var">C6</span> <span class="op">=</span> <span class="fn">sin</span>(<span class="num">2</span><span class="op">*</span><span class="kw">%pi</span><span class="op">*</span><span class="var">k</span><span class="op">*</span><span class="num">1047</span><span class="op">*</span><span class="var">t</span>)<span class="op">;</span>
+
+<span class="cmt">// ── A Notes (A1–A6) ──────────────────────────</span>
+<span class="var">A4</span> <span class="op">=</span> <span class="fn">sin</span>(<span class="num">2</span><span class="op">*</span><span class="kw">%pi</span><span class="op">*</span><span class="var">k</span><span class="op">*</span><span class="num">440</span><span class="op">*</span><span class="var">t</span>)<span class="op">;</span>  <span class="cmt">// Concert pitch A440</span>
+
+<span class="cmt">// ── Play higher octave tones ──────────────────</span>
+<span class="fn">sound</span>(<span class="var">C5</span><span class="op">,</span> <span class="var">fs</span>)<span class="op">;</span>     <span class="cmt">// Play C5 (523 Hz)</span>
+<span class="fn">sound</span>(<span class="var">C6</span><span class="op">,</span> <span class="var">fs</span>)<span class="op">;</span>     <span class="cmt">// Play C6 (1047 Hz)</span>
+
+<span class="cmt">// ── Plot waveform ─────────────────────────────</span>
+<span class="fn">plot</span>(<span class="var">t</span><span class="op">,</span> <span class="var">C6</span>)<span class="op">;</span>
+<span class="fn">title</span>(<span class="str">'Waveform of C6 (1047 Hz)'</span>)<span class="op">;</span>
+
+<span class="cmt">// ── Chord: Higher octave C major ──────────────</span>
+<span class="var">notes_high</span> <span class="op">=</span> [<span class="var">C5</span><span class="op">;</span> <span class="var">E5</span><span class="op">;</span> <span class="var">G5</span>]<span class="op">;</span>
+<span class="fn">sound</span>(<span class="fn">sum</span>(<span class="var">notes_high</span><span class="op">,</span> <span class="str">'r'</span>)<span class="op">,</span> <span class="var">fs</span>)<span class="op">;</span>
+
+<span class="cmt">// ── Melody: Scale C5→G5 ───────────────────────</span>
+<span class="fn">sound</span>([<span class="var">C5</span><span class="op">,</span> <span class="var">D5</span><span class="op">,</span> <span class="var">E5</span><span class="op">,</span> <span class="var">F5</span><span class="op">,</span> <span class="var">G5</span>]<span class="op">,</span> <span class="var">fs</span>)<span class="op">;</span></pre>
+  </div>
+</section>
+
+<!-- THEORY / FORMULA -->
+<section class="formula-section" id="theory">
+  <div class="section-label">05 — Mathematics</div>
+  <h2 class="section-title">Signal <em>Theory</em><span class="title-note">♩</span></h2>
+
+  <div class="formula-grid reveal">
+    <div class="formula-card">
+      <h3>Sine Wave Equation</h3>
+      <p>Every musical tone in the generator is mathematically described by the fundamental sine wave formula:</p>
+      <div class="formula-box">y(t) = A · sin(2π · f · t + φ)</div>
+      <div class="vars-row">
+        <div class="var-chip"><span class="vn">A</span><span class="vd">= amplitude</span></div>
+        <div class="var-chip"><span class="vn">f</span><span class="vd">= frequency (Hz)</span></div>
+        <div class="var-chip"><span class="vn">t</span><span class="vd">= time (s)</span></div>
+        <div class="var-chip"><span class="vn">φ</span><span class="vd">= phase = 0</span></div>
+      </div>
+    </div>
+
+    <div class="formula-card">
+      <h3>Nyquist-Shannon Theorem</h3>
+      <p>The sampling frequency (fs = 8000 Hz) must be at least twice the highest frequency to avoid aliasing:</p>
+      <div class="formula-box">fs ≥ 2 · fmax</div>
+      <p style="margin-top:16px">The highest generated tone is B6 at 1976 Hz. Since 8000 Hz > 2 × 1976 = 3952 Hz, Nyquist is satisfied for all tones.</p>
+    </div>
+
+    <div class="formula-card">
+      <h3>Octave Doubling</h3>
+      <p>Each octave doubles the frequency. This logarithmic relationship is why musical intervals sound consistent across registers:</p>
+      <div class="formula-box">f(octave n+1) = 2 · f(octave n)</div>
+      <div class="vars-row">
+        <div class="var-chip"><span class="vn">C4</span><span class="vd">262 Hz</span></div>
+        <div class="var-chip"><span class="vn">C5</span><span class="vd">523 Hz</span></div>
+        <div class="var-chip"><span class="vn">C6</span><span class="vd">1047 Hz</span></div>
+      </div>
+    </div>
+
+    <div class="formula-card">
+      <h3>Chord Superposition</h3>
+      <p>Chords are generated by summing individual sine waves. The principle of superposition gives us harmonic content:</p>
+      <div class="formula-box">chord(t) = C(t) + E(t) + G(t)</div>
+      <p style="margin-top:16px">The C major chord combines three sine waves at 262 Hz, 330 Hz, and 392 Hz — matching the harmonic series of Western music theory.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FREQ TABLE -->
+<section class="table-section">
+  <div class="section-label">06 — Frequency Reference</div>
+  <h2 class="section-title">Note <em>Frequencies</em><span class="title-note">♬</span></h2>
+
+  <table class="freq-table reveal">
+    <thead>
+      <tr>
+        <th>Note</th>
+        <th>Frequency (Hz)</th>
+        <th>Scilab Expression (k=2)</th>
+        <th>Relative Range</th>
+      </tr>
+    </thead>
+    <tbody id="freqTableBody"></tbody>
+  </table>
+</section>
+
+<!-- GITHUB -->
+<div class="github-section" id="github">
+  <div class="github-card">
+    <div class="github-icon">🐙</div>
+    <div>
+      <h3>Explore the Source</h3>
+      <p>Full Scilab source code, waveform plots, and documentation available on GitHub.</p>
+    </div>
+    <a href="https://github.com/power-code129/Audio-Tone-generator" target="_blank" class="btn btn-primary" style="font-size:14px;padding:15px 36px">
+      github.com/power-code129/Audio-Tone-generator →
+    </a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-left">
+    <strong>♩ Audio Tone Generator</strong> · ECE Project by Priyanka Gandhi A (22UEL031)
+  </div>
+  <div class="footer-notes">♩ ♪ ♫ ♬ 𝄞</div>
+  <div class="footer-right">Built with Scilab · Signal Processing · DSP ♪</div>
+</footer>
+
+<script>
+// ─────────────────────────────────────────────
+// Web Audio API Setup
+// ─────────────────────────────────────────────
+let audioCtx = null;
+let currentWaveType = 'sine';
+let activeOscillators = [];
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  return audioCtx;
+}
+
+function setWaveType(type, btn) {
+  currentWaveType = type;
+  document.querySelectorAll('.wave-type-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// Frequencies with k=2 scaling factor applied (as in Scilab: sin(2*pi*k*f*t), k=2)
+// C4=524, D4=588, E4=660, F4=698, G4=784, A4=880, B4=988
+const NOTE_FREQS = {
+  C: { 1:66,  2:130, 3:260, 4:524,  5:1046, 6:2094 },
+  D: { 1:74,  2:146, 3:292, 4:588,  5:1174, 6:2350 },
+  E: { 1:82,  2:164, 3:330, 4:660,  5:1318, 6:2638 },
+  F: { 1:88,  2:174, 3:350, 4:698,  5:1396, 6:2794 },
+  G: { 1:98,  2:196, 3:392, 4:784,  5:1568, 6:3136 },
+  A: { 1:110, 2:220, 3:440, 4:880,  5:1760, 6:3520 },
+  B: { 1:122, 2:246, 3:494, 4:988,  5:1976, 6:3952 },
+};
+
+const CHORDS = {
+  C_major: [{note:'C',oct:4},{note:'E',oct:4},{note:'G',oct:4}],
+  A_minor: [{note:'A',oct:4},{note:'C',oct:4},{note:'E',oct:4}],
+  G_major: [{note:'G',oct:4},{note:'B',oct:4},{note:'D',oct:4}],
+  F_major: [{note:'F',oct:4},{note:'A',oct:4},{note:'C',oct:4}],
+};
+
+// ─────────────────────────────────────────────
+// FLOATING MUSICAL NOTES — HERO LAYER
+// ─────────────────────────────────────────────
+const noteSymbols = ['♩','♪','♫','♬','𝄞','𝄢','♭','♯','𝄐'];
+const noteColors  = ['#e040fb','#00e5ff','#ffd54f','#c792ea','#82aaff','#c3e88d'];
+
+function spawnHeroNote() {
+  const layer = document.getElementById('heroNotesLayer');
+  if (!layer) return;
+  const el = document.createElement('span');
+  el.className = 'music-note';
+  el.textContent = noteSymbols[Math.floor(Math.random() * noteSymbols.length)];
+  el.style.left   = Math.random() * 92 + '%';
+  el.style.bottom = Math.random() * 30 + '%';
+  el.style.color  = noteColors[Math.floor(Math.random() * noteColors.length)];
+  el.style.fontSize = (16 + Math.random() * 18) + 'px';
+  const dur = 3.5 + Math.random() * 3;
+  el.style.animationDuration  = dur + 's';
+  el.style.animationDelay     = Math.random() * 2 + 's';
+  el.style.filter = 'drop-shadow(0 0 6px currentColor)';
+  layer.appendChild(el);
+  setTimeout(() => el.remove(), (dur + 2) * 1000);
+}
+
+// Spawn a note every 700ms
+setInterval(spawnHeroNote, 700);
+
+// ─────────────────────────────────────────────
+// NOTE BURST when a key/button is clicked
+// ─────────────────────────────────────────────
+function burstNotes(x, y) {
+  for (let i = 0; i < 5; i++) {
+    const el = document.createElement('span');
+    el.textContent = noteSymbols[Math.floor(Math.random() * 5)];
+    el.style.cssText = `
+      position:fixed;
+      left:${x}px; top:${y}px;
+      font-size:${14 + Math.random()*12}px;
+      color:${noteColors[Math.floor(Math.random()*noteColors.length)]};
+      pointer-events:none;
+      z-index:9999;
+      opacity:1;
+      filter:drop-shadow(0 0 5px currentColor);
+      transition: transform ${0.6+Math.random()*0.4}s ease-out, opacity ${0.5+Math.random()*0.3}s ease-out;
+      transform: translate(0,0) rotate(0deg);
+    `;
+    document.body.appendChild(el);
+    requestAnimationFrame(() => {
+      const dx = (Math.random() - 0.5) * 100;
+      const dy = -(30 + Math.random() * 70);
+      el.style.transform = `translate(${dx}px, ${dy}px) rotate(${(Math.random()-0.5)*60}deg)`;
+      el.style.opacity = '0';
+    });
+    setTimeout(() => el.remove(), 900);
+  }
+}
+
+
+
+function playTone(freq, duration, note) {
+  const ctx = getAudioCtx();
+  const amp = parseFloat(document.getElementById('ampRange').value);
+  const dur = parseFloat(document.getElementById('durRange').value);
+
+  const osc = ctx.createOscillator();
+  const gainNode = ctx.createGain();
+
+  osc.type = currentWaveType;
+  osc.frequency.setValueAtTime(freq, ctx.currentTime);
+  gainNode.gain.setValueAtTime(amp * 0.4, ctx.currentTime);
+  gainNode.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + (duration || dur));
+
+  osc.connect(gainNode);
+  gainNode.connect(ctx.destination);
+  osc.start(ctx.currentTime);
+  osc.stop(ctx.currentTime + (duration || dur));
+
+  // Update display
+  if (note) {
+    document.getElementById('currentNote').textContent = note;
+    document.getElementById('currentFreq').textContent = freq;
+  }
+
+  // Visualize
+  drawWave(freq, currentWaveType);
+
+  return osc;
+}
+
+function playChord(chordName) {
+  const notes = CHORDS[chordName];
+  const dur = parseFloat(document.getElementById('durRange').value);
+  notes.forEach(({note, oct}) => {
+    playTone(NOTE_FREQS[note][oct], dur, null);
+  });
+  document.getElementById('currentNote').textContent = chordName.replace('_', ' ');
+  document.getElementById('currentFreq').textContent = notes.map(n => NOTE_FREQS[n.note][n.oct]).join(' + ');
+}
+
+async function playMelody() {
+  const scale = ['C','D','E','F','G','A','B'];
+  const dur = 0.4;
+  for (let i = 0; i < scale.length; i++) {
+    const note = scale[i];
+    const freq = NOTE_FREQS[note][4];
+    playTone(freq, dur, note + '4');
+    highlightNote(note + '4');
+    await sleep(dur * 1000 + 50);
+  }
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ─────────────────────────────────────────────
+// BUILD NOTE GRID
+// ─────────────────────────────────────────────
+const notes4 = ['C','D','E','F','G','A','B'];
+const grid = document.getElementById('noteGrid');
+notes4.forEach(n => {
+  const btn = document.createElement('button');
+  btn.className = 'note-btn';
+  btn.textContent = n + '4';
+  btn.dataset.note = n + '4';
+  btn.onclick = (e) => {
+    playTone(NOTE_FREQS[n][4], null, n+'4');
+    btn.classList.add('playing');
+    setTimeout(() => btn.classList.remove('playing'), 400);
+    const r = btn.getBoundingClientRect();
+    burstNotes(r.left + r.width/2, r.top);
+  };
+  grid.appendChild(btn);
+});
+
+function highlightNote(noteName) {
+  document.querySelectorAll('.note-btn').forEach(b => {
+    if (b.dataset.note === noteName) {
+      b.classList.add('playing');
+      setTimeout(() => b.classList.remove('playing'), 400);
+    }
+  });
+}
+
+// ─────────────────────────────────────────────
+// HERO PIANO
+// ─────────────────────────────────────────────
+const heroPiano = document.getElementById('heroPiano');
+['C','D','E','F','G','A','B'].forEach(n => {
+  const key = document.createElement('div');
+  key.className = 'key white';
+  key.innerHTML = `<span>${n}4</span><span class="freq-display">${NOTE_FREQS[n][4]}Hz</span>`;
+  key.onclick = (e) => {
+    playTone(NOTE_FREQS[n][4], 0.5, n+'4');
+    drawHeroWave(NOTE_FREQS[n][4]);
+    key.classList.add('active');
+    setTimeout(() => key.classList.remove('active'), 300);
+    const r = key.getBoundingClientRect();
+    burstNotes(r.left + r.width/2, r.top);
+  };
+  heroPiano.appendChild(key);
+});
+
+// ─────────────────────────────────────────────
+// WAVEFORM DRAWING — HERO CANVAS
+// ─────────────────────────────────────────────
+const heroCanvas = document.getElementById('waveCanvas');
+const heroCtx = heroCanvas.getContext('2d');
+let heroAnimFrame;
+let heroFreq = 262;
+let heroTime = 0;
+
+function drawHeroWave(freq) {
+  heroFreq = freq;
+}
+
+function animateHero() {
+  const w = heroCanvas.width, h = heroCanvas.height;
+  heroCtx.clearRect(0, 0, w, h);
+
+  // Gradient line
+  const grad = heroCtx.createLinearGradient(0, 0, w, 0);
+  grad.addColorStop(0, 'rgba(0,229,255,0.0)');
+  grad.addColorStop(0.1, '#e040fb');
+  grad.addColorStop(0.9, '#00e5ff');
+  grad.addColorStop(1, 'rgba(0,229,255,0.0)');
+
+  heroCtx.strokeStyle = grad;
+  heroCtx.lineWidth = 2;
+  heroCtx.shadowColor = '#e040fb';
+  heroCtx.shadowBlur = 10;
+  heroCtx.beginPath();
+
+  const cycles = Math.max(1, heroFreq / 200);
+  for (let x = 0; x < w; x++) {
+    const t = (x / w) * cycles * 2 * Math.PI + heroTime;
+    const y = h / 2 + Math.sin(t) * (h * 0.38);
+    x === 0 ? heroCtx.moveTo(x, y) : heroCtx.lineTo(x, y);
+  }
+  heroCtx.stroke();
+
+  // Glow trail
+  heroCtx.strokeStyle = 'rgba(224,64,251,0.08)';
+  heroCtx.lineWidth = 6;
+  heroCtx.beginPath();
+  for (let x = 0; x < w; x++) {
+    const t = (x / w) * cycles * 2 * Math.PI + heroTime;
+    const y = h / 2 + Math.sin(t) * (h * 0.38);
+    x === 0 ? heroCtx.moveTo(x, y) : heroCtx.lineTo(x, y);
+  }
+  heroCtx.stroke();
+
+  heroTime += 0.04 + (heroFreq / 10000);
+  heroAnimFrame = requestAnimationFrame(animateHero);
+}
+animateHero();
+
+// ─────────────────────────────────────────────
+// WAVEFORM DRAWING — BIG CANVAS
+// ─────────────────────────────────────────────
+const bigCanvas = document.getElementById('bigCanvas');
+const bigCtx = bigCanvas.getContext('2d');
+let bigFreq = 262;
+let bigWaveType = 'sine';
+let bigTime = 0;
+let bigAnimFrame;
+
+function drawWave(freq, type) {
+  bigFreq = freq;
+  bigWaveType = type || currentWaveType;
+}
+
+function sampleWave(type, t) {
+  switch(type) {
+    case 'sine': return Math.sin(t);
+    case 'square': return Math.sign(Math.sin(t));
+    case 'sawtooth': return 2 * (t / (2 * Math.PI) - Math.floor(t / (2 * Math.PI) + 0.5));
+    case 'triangle': return 2 * Math.abs(2 * (t / (2 * Math.PI) - Math.floor(t / (2 * Math.PI) + 0.5))) - 1;
+    default: return Math.sin(t);
+  }
+}
+
+function animateBig() {
+  const w = bigCanvas.width, h = bigCanvas.height;
+  bigCtx.clearRect(0, 0, w, h);
+
+  // Grid lines
+  bigCtx.strokeStyle = 'rgba(255,255,255,0.04)';
+  bigCtx.lineWidth = 1;
+  for (let i = 1; i < 4; i++) {
+    bigCtx.beginPath();
+    bigCtx.moveTo(0, (h / 4) * i);
+    bigCtx.lineTo(w, (h / 4) * i);
+    bigCtx.stroke();
+  }
+
+  const grad = bigCtx.createLinearGradient(0, 0, w, 0);
+  grad.addColorStop(0, 'rgba(0,229,255,0)');
+  grad.addColorStop(0.05, '#e040fb');
+  grad.addColorStop(0.95, '#00e5ff');
+  grad.addColorStop(1, 'rgba(0,229,255,0)');
+
+  bigCtx.strokeStyle = grad;
+  bigCtx.lineWidth = 2.5;
+  bigCtx.shadowColor = '#00e5ff';
+  bigCtx.shadowBlur = 12;
+  bigCtx.beginPath();
+
+  const cycles = Math.max(1.5, bigFreq / 160);
+  for (let x = 0; x < w; x++) {
+    const t = (x / w) * cycles * 2 * Math.PI + bigTime;
+    const sample = sampleWave(bigWaveType, t);
+    const y = h / 2 - sample * (h * 0.4);
+    x === 0 ? bigCtx.moveTo(x, y) : bigCtx.lineTo(x, y);
+  }
+  bigCtx.stroke();
+
+  bigTime += 0.05 + (bigFreq / 8000);
+  requestAnimationFrame(animateBig);
+}
+animateBig();
+
+// ─────────────────────────────────────────────
+// FREQUENCY TABLE
+// ─────────────────────────────────────────────
+const tbody = document.getElementById('freqTableBody');
+// Base frequencies (before k=2 scaling) for Scilab expression display
+const BASE_FREQS = { C:262, D:294, E:330, F:349, G:392, A:440, B:494 };
+const maxFreq = 988; // B4 with k=2
+['C','D','E','F','G','A','B'].forEach(n => {
+  const tr = document.createElement('tr');
+  tr.onclick = () => playTone(NOTE_FREQS[n][4], 0.5, n+'4');
+  tr.innerHTML = `
+    <td class="note-name">${n}4</td>
+    <td class="freq-val">${NOTE_FREQS[n][4]} Hz</td>
+    <td class="freq-val" style="font-size:11px;color:var(--muted)">sin(2·π·2·${BASE_FREQS[n]}·t)</td>
+    <td class="bar-cell">
+      <div class="freq-bar" style="width:${Math.round(NOTE_FREQS[n][4]/maxFreq*180)}px"></div>
+    </td>
+  `;
+  tbody.appendChild(tr);
+});
+
+// ─────────────────────────────────────────────
+// SCROLL REVEAL
+// ─────────────────────────────────────────────
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1 });
+reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
